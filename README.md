@@ -1,42 +1,64 @@
-# Credit Card Transaction Risk Analysis Dashboard
+# 📊 Credit Card Transaction Risk Analysis Dashboard
 
-Đồ án môn Thực hành Kỹ thuật Phân tích Dữ liệu (THKTPTDL)
+A data analysis project that builds a behavioral `RiskScore` system to identify suspicious credit card transactions from an unlabeled dataset.
 
-## Mô tả
+---
 
-Phân tích rủi ro giao dịch thẻ tín dụng từ dataset không có nhãn gian lận thật. Hướng tiếp cận: xây dựng hệ thống `RiskScore` dựa trên các đặc trưng hành vi giao dịch để nhận diện giao dịch cần theo dõi.
+## Overview
 
-## Cấu trúc
+The dataset contains no ground-truth fraud labels (`fraud`, `is_fraud`, `Class`, etc.), so the approach focuses on:
 
-| File | Mô tả |
-|------|-------|
-| `creditcard_risk_analysis.ipynb` | Notebook chính — FINAL CODE V2 |
-| `cc_info.csv` | Thông tin thẻ tín dụng (hạn mức, địa chỉ) |
-| `transactions.csv` | Dữ liệu giao dịch gốc |
-| `creditcard_merged_basic.csv` | Dữ liệu đã merge & feature engineering |
-| `creditcard_risk_dashboard_v2.html` | Dashboard tương tác (xuất từ notebook) |
-| `Do_an_THKTPTDL_creditcard.pptx` | Slide thuyết trình |
+> Analyzing transactions across multiple risk-related dimensions and constructing a `RiskScore` to flag transactions that warrant review or indicate high suspicion.
 
-## Mạch xử lý
+- `NeedReview = 1` if `RiskScore >= 2` — transaction requires monitoring
+- `PotentialFraud = 1` if `RiskScore >= 3` — high-suspicion transaction
+- `PotentialFraud` is a **proxy label**, not a verified fraud label from a financial institution
+
+---
+
+## Pipeline
 
 ```
-Dữ liệu gốc
-→ Kiểm tra & Merge dữ liệu
+Raw Data
+→ Data Validation & Merging
 → Feature Engineering
-→ EDA trước RiskScore
-→ Phân tích tỷ lệ giao dịch so với hạn mức
-→ Xây dựng RiskScore (điều chỉnh theo phân phối dữ liệu)
-→ EDA sau RiskScore
-→ ANOVA / Chi-square
-→ Linear Regression / Logistic Regression / Decision Tree
-→ So sánh mô hình
+→ Pre-RiskScore EDA
+→ Credit Limit Utilization Analysis
+→ RiskScore Construction (distribution-adjusted thresholds)
+→ Post-RiskScore EDA
+→ ANOVA
+→ Chi-square Tests
+→ Linear Regression
+→ Feature Audit (circular reasoning check)
+→ Logistic Regression
+→ Decision Tree
+→ Model Comparison
 ```
 
-## Nhãn proxy
+---
 
-- `NeedReview = 1` nếu `RiskScore >= 2` — giao dịch cần theo dõi
-- `PotentialFraud = 1` nếu `RiskScore >= 3` — giao dịch nghi ngờ cao
+## Repository Structure
 
-## Tech stack
+| File | Description |
+|------|-------------|
+| `creditcard_risk_analysis.ipynb` | Main notebook — Final Code V2 |
+| `cc_info.csv` | Card information (credit limits, location) |
+| `transactions.csv` | Raw transaction data |
+| `creditcard_merged_basic.csv` | Merged dataset with engineered features |
+| `creditcard_risk_dashboard_v2.html` | Interactive dashboard (exported from notebook) |
+| `Do_an_THKTPTDL_creditcard.pptx` | Presentation slides |
+
+---
+
+## Key Design Decisions
+
+- `amount` extreme threshold uses **P99** instead of P95
+- `amount_to_limit_high` threshold uses **P99** instead of a hard 0.50 cutoff
+- `daily_cum_to_limit_high` threshold uses **P99** instead of a hard 0.80 cutoff
+- Separate analysis confirms that transactions at or near the credit limit are genuinely rare
+
+---
+
+## Tech Stack
 
 Python 3 · pandas · numpy · matplotlib · scipy · statsmodels · scikit-learn
